@@ -104,6 +104,8 @@ let activeStream = null;
 let recTimer = null;
 let recSeconds = 0;
 let deferredPrompt = null;
+let activeAudio = null;
+let activeAudioQ = null;
 
 // --- PWA: Service Worker Registration ---
 if ('serviceWorker' in navigator) {
@@ -254,10 +256,34 @@ function toggleQ(header) {
 
 function playQ(n, e) {
   e.stopPropagation();
+  // Stop any currently playing audio
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio.currentTime = 0;
+    // Update previous button back to play icon
+    if (activeAudioQ !== null) {
+      const prevBtn = document.querySelector(`#rec-${activeAudioQ}`).parentElement.querySelector('.btn-play');
+      if (prevBtn) prevBtn.innerHTML = '&#9654; Вопрос';
+    }
+    // If same question tapped again, just stop
+    if (activeAudioQ === n) {
+      activeAudio = null;
+      activeAudioQ = null;
+      return;
+    }
+  }
   const key = 'q' + String(n).padStart(2, '0');
   const b64 = AUDIO[key];
-  const audio = new Audio('data:audio/mp3;base64,' + b64);
-  audio.play();
+  activeAudio = new Audio('data:audio/mp3;base64,' + b64);
+  activeAudioQ = n;
+  const btn = e.currentTarget;
+  btn.innerHTML = '&#9209; Стоп';
+  activeAudio.onended = () => {
+    btn.innerHTML = '&#9654; Вопрос';
+    activeAudio = null;
+    activeAudioQ = null;
+  };
+  activeAudio.play();
 }
 
 async function toggleRec(n, e) {
