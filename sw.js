@@ -1,4 +1,4 @@
-const CACHE_NAME = 'herbalife-interview-v2';
+const CACHE_NAME = 'herbalife-interview-v3';
 const ASSETS = ['./index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', event => {
